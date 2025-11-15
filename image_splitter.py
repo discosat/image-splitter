@@ -18,6 +18,9 @@ def load_combined_file(filename: str):
     metadata_bytes = data[4:4 + metadata_size]
     image_bytes = data[4 + metadata_size:]
 
+    print("metadata bytes ", len(metadata_bytes))
+    print("image_bytes ", len(image_bytes))
+
     return metadata_bytes, image_bytes
 
 
@@ -34,9 +37,9 @@ def parse_metadata(metadata_bytes: bytes, output_file="metadata.json"):
     return json.loads(json_string)
 
 
-def save_image_data(image_bytes: bytes, output_file="image.raw"):
+def save_image_data(image_bytes: bytes, image_len: int, output_file="image.raw"):
     with open(output_file, "wb") as f:
-        f.write(image_bytes)
+        f.write(image_bytes[:image_len])
     print(f"Raw image data written to {output_file}")
 
 
@@ -44,11 +47,12 @@ def save_preview(image_bytes: bytes, metadata: dict, dtype=np.uint16):
     height = metadata["height"]
     width = metadata["width"]
     channels = metadata["channels"]
+    size = metadata["size"]
 
     print("Parsed metadata:", metadata)
 
     # Convert raw data → numpy
-    img = np.frombuffer(image_bytes, dtype=dtype)
+    img = np.frombuffer(image_bytes[:size], dtype=dtype)
 
     expected_size = height * width * channels
     if img.size != expected_size:
@@ -93,7 +97,7 @@ if __name__ == "__main__":
     metadata = parse_metadata(metadata_bytes, args.meta)
 
     # Write raw image data
-    save_image_data(image_bytes, args.output)
+    save_image_data(image_bytes, metadata["size"], args.output)
 
     # Optionally show/save preview
     if not args.no_preview:
