@@ -43,12 +43,22 @@ def save_image_data(image_bytes: bytes, image_len: int, output_file="image.raw")
     print(f"Raw image data written to {output_file}")
 
 
-def save_preview(image_bytes: bytes, metadata: dict, dtype=np.uint16):
+def save_preview(image_bytes: bytes, metadata: dict):
     height = metadata["height"]
     width = metadata["width"]
     channels = metadata["channels"]
     size = metadata["size"]
+    bpp = metadata["bitsPixel"]
 
+    if bpp == 8:
+        dtype = np.uint8
+    elif bpp == 16:
+        dtype = np.uint16
+    elif bpp == 12:
+        dtype = np.uint16
+    else:
+        raise ValueError(f"Bits per pixel value needs to be one of [8, 12, 16]. Got: {bpp}")
+ 
     print("Parsed metadata:", metadata)
 
     # Convert raw data → numpy
