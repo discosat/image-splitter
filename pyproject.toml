@@ -9,6 +9,7 @@ dependencies = [
     "numpy",
     "pillow",
     "protobuf",
+    "python-semantic-release>=10.5.2",
 ]
 
 [project.optional-dependencies]
@@ -16,6 +17,9 @@ test = [
     "pytest>=9.0.1",
     "pytest-mock>=3.15.1",
 ]
+
+[tool.semantic_release]
+version_variable = "image_splitter/__init__.py:__version__"
 
 [project.scripts]
 image-splitter = "image_splitter.cli:main"
