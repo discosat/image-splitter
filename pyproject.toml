@@ -1,7 +1,8 @@
 [project]
 name = "image-splitter"
-version = "0.1.0"
-description = "Add your description here"
+version = "1.0.0"
+description = "Split satellite DTP binary data into metadata, raw image, and preview"
+authors = [{ name="Bergur Davidsen" }]
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -9,3 +10,6 @@ dependencies = [
     "pillow",
     "protobuf",
 ]
+
+[project.scripts]
+image-splitter = "image_splitter.cli:main"
