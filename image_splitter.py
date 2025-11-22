@@ -20,6 +20,9 @@ def load_combined_file(filename: str):
     metadata_bytes = data[4 : 4 + metadata_size]
     image_bytes = data[4 + metadata_size :]
 
+    print("metadata bytes ", len(metadata_bytes))
+    print("image_bytes ", len(image_bytes))
+
     return metadata_bytes, image_bytes
 
 
@@ -34,17 +37,37 @@ def parse_metadata(metadata_bytes: bytes, output_path: Path):
     return json.loads(json_string)
 
 
-def save_image_data(image_bytes: bytes, output_path: Path):
-    with open(output_path, "wb") as f:
-        f.write(image_bytes)
+def save_image_data(image_bytes: bytes, image_len: int, output_file="image.raw"):
+    with open(output_file, "wb") as f:
+        f.write(image_bytes[:image_len])
+    print(f"Raw image data written to {output_file}")
 
 
-def save_preview(image_bytes: bytes, metadata: dict, output_dir: Path, dtype=np.uint16):
+def save_preview(image_bytes: bytes, metadata: dict):
     height = metadata["height"]
     width = metadata["width"]
     channels = metadata["channels"]
+    size = metadata["size"]
+    bpp = metadata["bitsPixel"]
 
-    img = np.frombuffer(image_bytes, dtype=dtype)
+    if bpp == 8:
+        dtype = np.uint8
+    elif bpp == 16:
+        dtype = np.uint16
+    elif bpp == 12:
+        dtype = np.uint16
+    else:
+        raise ValueError(f"Bits per pixel value needs to be one of [8, 12, 16]. Got: {bpp}")
+ 
+    print("Parsed metadata:", metadata)
+
+    # Convert raw data → numpy
+    img = np.frombuffer(image_bytes[:size], dtype=dtype)
+
+    expected_size = height * width * channels
+    if img.size != expected_size:
+        raise ValueError(f"Raw data size mismatch: expected {expected_size}, got {img.size}")
+
     img = img.reshape((height, width, channels))
 
     img_8bit = ((img - img.min()) / (img.max() - img.min()) * 255).astype(np.uint8)
@@ -121,9 +144,8 @@ if __name__ == "__main__":
     meta_path = outdir / "metadata.json"
     metadata = parse_metadata(metadata_bytes, meta_path)
 
-    # Save raw image
-    raw_path = outdir / "image.raw"
-    save_image_data(image_bytes, raw_path)
+    # Write raw image data
+    save_image_data(image_bytes, metadata["size"], args.output)
 
     # Preview
     if not args.no_preview:
