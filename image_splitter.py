@@ -46,8 +46,6 @@ def save_preview(image_bytes: bytes, metadata: dict, output_dir: Path, dtype=np.
     height = metadata["height"]
     width = metadata["width"]
     channels = metadata["channels"]
-    size = metadata["size"]
-    bpp = metadata["bitsPixel"]
 
     img = np.frombuffer(image_bytes, dtype=dtype)
     img = img.reshape((height, width, channels))
