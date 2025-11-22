@@ -22,7 +22,7 @@ jobs:
           pip install .[dev,test]  # install your package with test dependencies
           pip install python-semantic-release
 
-      - name: Run semantic-release (version only)
-        run: semantic-release publish --no-upload
+      - name: Bump version
+        run: semantic-release version
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
