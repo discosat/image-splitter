@@ -2,6 +2,7 @@ import argparse
 import json
 import shutil
 import struct
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -9,7 +10,7 @@ import numpy as np
 from google.protobuf import json_format
 from PIL import Image
 
-import metadata_pb2 as metadata_pb2
+from . import metadata_pb2
 
 
 def load_combined_file(filename: str):
@@ -102,58 +103,77 @@ def ensure_output_dir(path: Path, force: bool):
     return path
 
 
+def main():
+    try:
+        parser = argparse.ArgumentParser(
+            description="Split combined binary file into metadata + raw image."
+        )
+        parser.add_argument("filename", help="Input dtp_data.bin file")
+
+        parser.add_argument(
+            "--outdir",
+            default=None,
+            help="Output directory (default: output_YYYYMMDD_HHMMSS)",
+        )
+
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            help="Overwrite existing output directory",
+        )
+
+        parser.add_argument(
+            "--no-preview",
+            action="store_true",
+            help="Skip generating preview image",
+        )
+
+        args = parser.parse_args()
+
+        # Determine output directory
+        if args.outdir:
+            outdir = Path(args.outdir)
+        else:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            outdir = Path(f"output_{timestamp}")
+
+        ensure_output_dir(outdir, args.force)
+
+        # Copy original file
+        orig_path = Path(args.filename)
+        shutil.copy(orig_path, outdir / orig_path.name)
+
+        # Load and split
+        metadata_bytes, image_bytes = load_combined_file(args.filename)
+
+        # Save metadata
+        meta_path = outdir / "metadata.json"
+        metadata = parse_metadata(metadata_bytes, meta_path)
+
+        # Write raw image data
+        raw_path = outdir / "image.raw"
+        save_image_data(image_bytes, metadata["size"], raw_path)
+
+        # Preview
+        if not args.no_preview:
+            save_preview(image_bytes[: metadata["size"]], metadata, outdir)
+
+        print(f"\nAll output saved in: {outdir.resolve()}")
+
+    except FileExistsError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception:
+        # unexpected errors still print full traceback
+        import traceback
+
+        print("An unexpected error occurred:", file=sys.stderr)
+        traceback.print_exc()
+        sys.exit(1)
+
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Split combined binary file into metadata + raw image."
-    )
-    parser.add_argument("filename", help="Input dtp_data.bin file")
-
-    parser.add_argument(
-        "--outdir",
-        default=None,
-        help="Output directory (default: output_YYYYMMDD_HHMMSS)",
-    )
-
-    parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Overwrite existing output directory",
-    )
-
-    parser.add_argument(
-        "--no-preview",
-        action="store_true",
-        help="Skip generating preview image",
-    )
-
-    args = parser.parse_args()
-
-    # Determine output directory
-    if args.outdir:
-        outdir = Path(args.outdir)
-    else:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        outdir = Path(f"output_{timestamp}")
-
-    ensure_output_dir(outdir, args.force)
-
-    # Copy original file
-    orig_path = Path(args.filename)
-    shutil.copy(orig_path, outdir / orig_path.name)
-
-    # Load and split
-    metadata_bytes, image_bytes = load_combined_file(args.filename)
-
-    # Save metadata
-    meta_path = outdir / "metadata.json"
-    metadata = parse_metadata(metadata_bytes, meta_path)
-
-    # Write raw image data
-    raw_path = outdir / "image.raw"
-    save_image_data(image_bytes, metadata["size"], raw_path)
-
-    # Preview
-    if not args.no_preview:
-        save_preview(image_bytes[: metadata["size"]], metadata, outdir)
-
-    print(f"\nAll output saved in: {outdir.resolve()}")
+    main()
