@@ -23,6 +23,11 @@ dev = [
 
 [tool.semantic_release]
 version_variable = "image_splitter/__init__.py:__version__"
+commit_parser = "conventional"
+
+[tool.semantic_release.changelog.default_templates]
+changelog_file = "CHANGELOG.md"
+output_format = "md"
 
 [project.scripts]
 image-splitter = "image_splitter.cli:main"
