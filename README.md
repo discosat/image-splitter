@@ -47,23 +47,21 @@ output_YYYYMMDD_HHMMSS
 
 You can also supply a custom output directory.
 
----
+### Running the tool
 
-## Running the tool
-
-### Globally (after pip install)
+#### Globally (after pip install)
 
 ```bash
 image-splitter <input_file> [--outdir <folder>] [--force] [--no-preview]
 ```
 
-### Using Python directly
+#### Using Python directly
 
 ```bash
 python -m image_splitter.cli <input_file> [--outdir <folder>] [--force] [--no-preview]
 ```
 
-### Using uv
+#### Using uv
 
 ```bash
 uv run image_splitter.cli <input_file> [--outdir <folder>] [--force] [--no-preview]
@@ -73,11 +71,11 @@ uv run image_splitter.cli <input_file> [--outdir <folder>] [--force] [--no-previ
 
 ## Arguments
 
-### **Positional**
+### Positional
 
 * **`<input_file>`** — Path to the combined dtp data file (e.g. `dtp_data.bin`).
 
-### **Optional arguments**
+### Optional arguments
 
 | Argument            | Description                                                 |
 | ------------------- | ----------------------------------------------------------- |
@@ -137,6 +135,45 @@ image-splitter dtp_data.bin --no-preview
 ```bash
 python -m image_splitter.cli dtp_data.bin --outdir ~/Downloads/joe
 ```
+
+---
+
+## Development & Testing
+
+This project includes automated tests using `pytest`.
+
+### Run tests locally
+
+```bash
+pytest -v tests/
+```
+
+### GitHub Actions
+
+* Tests are automatically run on every pull request and merge to `main`.
+* Branch protection is configured to prevent merging if tests fail.
+
+### Mock Data for Tests
+
+The tests include helper fixtures to generate dummy `.bin` files with valid metadata and image data, so you can run tests without real satellite data.
+
+---
+
+## Versioning
+
+This project uses [Semantic Release](https://python-semantic-release.readthedocs.io/) to automatically bump versions based on **conventional commits**.
+
+* `fix:` → Patch version bump
+* `feat:` → Minor version bump
+* `BREAKING CHANGE:` → Major version bump
+
+The version is stored in:
+
+```
+image_splitter/__init__.py
+```
+
+> No automatic PyPI release is done; version is updated locally and committed via the workflow.
 
 ---
 
