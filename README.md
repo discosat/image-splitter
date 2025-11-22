@@ -20,7 +20,7 @@ git clone https://github.com/discosat/image-splitter.git
 cd image-splitter
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+pip install .
 ```
 
 ### Option 2: Using uv
@@ -30,8 +30,10 @@ If you have [uv](https://github.com/astral-sh/uv) installed:
 ```bash
 git clone https://github.com/discosat/image-splitter.git
 cd image-splitter
-uv run image_splitter.py --help
+uv run image_splitter.cli --help
 ```
+
+> After installation with `pip install .` , the CLI can also be run globally as `image-splitter` from anywhere.
 
 ---
 
@@ -49,16 +51,22 @@ You can also supply a custom output directory.
 
 ## Running the tool
 
-### Using Python
+### Globally (after pip install)
 
 ```bash
-python image_splitter.py <input_file> [--outdir <folder>] [--force] [--no-preview]
+image-splitter <input_file> [--outdir <folder>] [--force] [--no-preview]
+```
+
+### Using Python directly
+
+```bash
+python -m image_splitter.cli <input_file> [--outdir <folder>] [--force] [--no-preview]
 ```
 
 ### Using uv
 
 ```bash
-uv run image_splitter.py <input_file> [--outdir <folder>] [--force] [--no-preview]
+uv run image_splitter.cli <input_file> [--outdir <folder>] [--force] [--no-preview]
 ```
 
 ---
@@ -103,25 +111,31 @@ output_20251122_143443/
 ### Basic usage
 
 ```bash
-python image_splitter.py dtp_data.bin
+image-splitter dtp_data.bin
 ```
 
 ### Custom output directory
 
 ```bash
-python image_splitter.py dtp_data.bin --outdir results_sat_03
+image-splitter dtp_data.bin --outdir results_sat_03
 ```
 
 ### Overwrite existing directory
 
 ```bash
-python image_splitter.py dtp_data.bin --outdir output --force
+image-splitter dtp_data.bin --outdir output --force
 ```
 
-### Using uv
+### Skip preview
 
 ```bash
-uv run image_splitter.py dtp_data.bin --no-preview
+image-splitter dtp_data.bin --no-preview
+```
+
+### Using Python directly
+
+```bash
+python -m image_splitter.cli dtp_data.bin --outdir ~/Downloads/joe
 ```
 
 ---
@@ -129,8 +143,9 @@ uv run image_splitter.py dtp_data.bin --no-preview
 ## Notes
 
 * Preview generation normalizes raw data into 8‑bit PNG.
-* Pillow now automatically infers image mode (`L`, `RGB`, etc.), so the script does not specify the deprecated `mode=` argument.
+* Pillow automatically infers image mode (`L`, `RGB`, etc.), so the script does not specify the deprecated `mode=` argument.
 * Metadata is parsed from the protobuf definition in `metadata_pb2.py`.
+* After `pip install .`, the CLI is available globally as `image-splitter`.
 
 ---
 
