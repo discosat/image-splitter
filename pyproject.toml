@@ -24,6 +24,8 @@ dev = [
 [tool.semantic_release]
 version_variable = "image_splitter/__init__.py:__version__"
 commit_parser = "conventional"
+changelog_file = "CHANGELOG.md"
+changelog_type = "github"
 
 [tool.semantic_release.changelog.default_templates]
 changelog_file = "CHANGELOG.md"
