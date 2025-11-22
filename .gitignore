@@ -10,3 +10,4 @@ wheels/
 *.json
 # Virtual environments
 .venv
+dtp_data*.bin
