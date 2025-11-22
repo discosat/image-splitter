@@ -37,13 +37,13 @@ def parse_metadata(metadata_bytes: bytes, output_path: Path):
     return json.loads(json_string)
 
 
-def save_image_data(image_bytes: bytes, image_len: int, output_file="image.raw"):
+def save_image_data(image_bytes: bytes, image_len: int, output_file: Path):
     with open(output_file, "wb") as f:
         f.write(image_bytes[:image_len])
     print(f"Raw image data written to {output_file}")
 
 
-def save_preview(image_bytes: bytes, metadata: dict):
+def save_preview(image_bytes: bytes, metadata: dict, output_dir: Path):
     height = metadata["height"]
     width = metadata["width"]
     channels = metadata["channels"]
@@ -57,8 +57,10 @@ def save_preview(image_bytes: bytes, metadata: dict):
     elif bpp == 12:
         dtype = np.uint16
     else:
-        raise ValueError(f"Bits per pixel value needs to be one of [8, 12, 16]. Got: {bpp}")
- 
+        raise ValueError(
+            f"Bits per pixel value needs to be one of [8, 12, 16]. Got: {bpp}"
+        )
+
     print("Parsed metadata:", metadata)
 
     # Convert raw data → numpy
@@ -66,7 +68,9 @@ def save_preview(image_bytes: bytes, metadata: dict):
 
     expected_size = height * width * channels
     if img.size != expected_size:
-        raise ValueError(f"Raw data size mismatch: expected {expected_size}, got {img.size}")
+        raise ValueError(
+            f"Raw data size mismatch: expected {expected_size}, got {img.size}"
+        )
 
     img = img.reshape((height, width, channels))
 
@@ -145,10 +149,11 @@ if __name__ == "__main__":
     metadata = parse_metadata(metadata_bytes, meta_path)
 
     # Write raw image data
-    save_image_data(image_bytes, metadata["size"], args.output)
+    raw_path = outdir / "image.raw"
+    save_image_data(image_bytes, metadata["size"], raw_path)
 
     # Preview
     if not args.no_preview:
-        save_preview(image_bytes, metadata, outdir)
+        save_preview(image_bytes[: metadata["size"]], metadata, outdir)
 
     print(f"\nAll output saved in: {outdir.resolve()}")
